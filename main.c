@@ -97,6 +97,11 @@ int main(int argc, char **argv)
 {
   MAIN_CONTEXT ctx = {0};
 
+  if (signal_instance() < 0) {
+    printf("tcron is already running!\n");
+    return 0;
+  }
+
   get_path(&ctx);
 
   if (access(ctx.file_path, F_OK) != 0) {
