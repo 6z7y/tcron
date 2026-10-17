@@ -41,7 +41,7 @@ void *reload_cfg_thread(void *arg)
 
       // the checker
       if (event->mask & IN_CLOSE_WRITE || event->mask & IN_MODIFY) {
-        if (event->len > 0 && !strcmp(event->name, ".tcron")) {
+        if (event->len > 0 && !strcmp(event->name, "tcron")) {
           FILE *f = fopen(ctx->file_path_file, "r");
           if (!f) {
             perror("file");
