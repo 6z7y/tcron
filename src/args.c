@@ -18,7 +18,7 @@ void help()
 
 int arg_handle(MAIN_CONTEXT *ctx, int argc, char **argv)
 {
-  if (argc <= 0) return 0;
+  if (argc <= 1) return 0;
 
   const char *help_opts[] = {"help", "-h", "--help", NULL};
   const char *ver_opts[] = {"version", "-v", "--version", NULL};
