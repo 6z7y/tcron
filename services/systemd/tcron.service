@@ -1,0 +1,9 @@
+[Unit]
+Description=tcron scheduler
+
+[Service]
+ExecStart=/usr/local/bin/tcron
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

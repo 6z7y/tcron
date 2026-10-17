@@ -63,16 +63,22 @@ void *reload_cfg_thread(void *arg)
 
 int main(int argc, char **argv)
 {
-  signal(SIGCHLD, SIG_IGN);
   MAIN_CONTEXT ctx = {0};
 
   get_path(&ctx);
 
   if (arg_handle(&ctx, argc, argv) > 0) return 0;
 
-  if (signal_instance() < 0) {
+  signal(SIGCHLD, SIG_IGN);
+
+  int r = signal_instance();
+
+  if (r == -1) {
     printf("tcron is already running!\n");
     return 0;
+  }
+  if (r < 0) {
+    return -1;
   }
 
   check_cfg(&ctx);
@@ -117,8 +123,6 @@ int main(int argc, char **argv)
           strcpy(copy_cmd, ctx.lay[i].cmd);
           run_command(&ctx, ctx.lay[i].cmd);
           write_access_log(&ctx, copy_cmd);
-
-          ctx.lay[i].counter = 0;
         }
       }
     }

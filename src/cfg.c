@@ -2,23 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "DATA.h"
 
 void get_path(MAIN_CONTEXT *ctx)
 {
-  const char *home_path = getenv("HOME");
-  if (home_path == NULL) exit(-1);
+  // const char *home_path = getenv("HOME");
+  // if (home_path == NULL) exit(-1);
 
   // cfg paths
-  sprintf(ctx->files.cfg_path_parent, "%s/.local/share/tcron/", home_path);
+  sprintf(ctx->files.cfg_path_parent, "/etc/tcron/");
   sprintf(ctx->files.cfg_path_file, "%stcron", ctx->files.cfg_path_parent);
 
   // logs paths
-  sprintf(ctx->files.log_path_parent, "%s/.local/state/tcron/", home_path);
-  sprintf(ctx->files.log_access_path_file, "%s/.local/state/tcron/access.log", home_path);
-  sprintf(ctx->files.log_errors_path_file, "%s/.local/state/tcron/errors.log", home_path);
-
+  sprintf(ctx->files.log_path_parent, "/var/log/tcron/");
+  sprintf(ctx->files.log_access_path_file, "%saccess.log", ctx->files.log_path_parent);
+  sprintf(ctx->files.log_errors_path_file, "%serrors.log", ctx->files.log_path_parent);
 }
 
 int to_sec(char *interval)
@@ -92,6 +92,7 @@ void init_cfg_file(MAIN_CONTEXT *ctx)
       "# Example: run pwd at 08:30\n"
       "08:30 pwd\n"
       );
+  fchmod(fileno(f), 0666);
 
   fclose(f);
 }
@@ -103,4 +104,5 @@ void check_cfg(MAIN_CONTEXT *ctx)
 
   if (access(ctx->files.cfg_path_file, F_OK) != 0)
     init_cfg_file(ctx);
+
 }
