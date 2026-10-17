@@ -1,3 +1,6 @@
+// args
+// check if file modify
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -61,12 +64,12 @@ int to_sec(char *interval)
 
 void error_log(const char *cmd)
 {
-  FILE *f = fopen("/tmp/tcron_err_log", "a");
+  FILE *f = fopen("/tmp/tcron.err", "a");
   fprintf(f, "error in '%s': %s\n\n", cmd, strerror(errno));
   fclose(f);
 }
 
-void run_command(const char *cmd)
+void run_command(char *cmd)
 {
   pid_t pid = fork();
 
@@ -76,9 +79,19 @@ void run_command(const char *cmd)
   }
 
   if (pid == 0) {
-    execlp("sh", "sh", "-c", cmd, (char *)NULL);
+    char *argv[32];
+    int i=0;
+
+    argv[i] = strtok(cmd, " ");
+
+    while (argv[i] != NULL || i < 31) {
+      argv[++i] = strtok(NULL, " ");
+    }
+
+    execvp(argv[0], argv);
 
     error_log(cmd);// if failed command enter here
+    _exit(127);
   }
 }
 
