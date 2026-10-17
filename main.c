@@ -11,6 +11,11 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "libs/arg_match.h"
+
+#define PROG_NAME "tcron"
+#define PROG_VER "1.0.0"
+
 #define CMD_SIZE 1024
 #define LINE_SIZE 512
 
@@ -106,16 +111,54 @@ int signal_instance()
   return 0;
 }
 
+void help()
+{
+    printf(
+        "Usage: tcron [OPTION]\n"
+        "\n"
+        "Options:\n"
+        "  -e              Edit tcron configuration\n"
+        "  -h, --help      Show this help message\n"
+        "  -v, --version   Show version information\n"
+    );
+}
+
+int arg_handle(MAIN_CONTEXT *ctx, int argc, char **argv)
+{
+  const char *help_opts[] = {"help", "-h", "--help"};
+  const char *ver_opts[] = {"version", "-v", "--version"};
+
+
+  if (argc > 1) {
+    for (int i=1; i<argc; i++) {
+      if (arg_match_opt(&argc, argv, "-e") == 1) {
+        char *editor = getenv("EDITOR");
+
+        if (!editor) editor = "vi";
+
+        char cmd[128];
+        snprintf(cmd, 128, "%s %s", editor, ctx->file_path);
+        system(cmd);
+        return 1;
+      }
+      if (arg_match_opts(&argc, argv, help_opts) == 1) help(); return 1;
+      if (arg_match_opts(&argc, argv, ver_opts) == 1) printf("%s: %s\n", PROG_NAME, PROG_VER); return 1;
+    }
+  }
+  return 0;
+}
+
 int main(int argc, char **argv)
 {
   MAIN_CONTEXT ctx = {0};
+  get_path(&ctx);
+
+  if (arg_handle(&ctx, argc, argv) > 0) return 0;
 
   if (signal_instance() < 0) {
     printf("tcron is already running!\n");
     return 0;
   }
-
-  get_path(&ctx);
 
   if (access(ctx.file_path, F_OK) != 0) {
 
