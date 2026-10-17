@@ -29,7 +29,7 @@ int arg_handle(MAIN_CONTEXT *ctx, int argc, char **argv)
     if (!editor) editor = "vi";
 
     char cmd[128];
-    snprintf(cmd, 128, "%s %s", editor, ctx->file_path_file);
+    snprintf(cmd, 128, "%s %s", editor, ctx->files.cfg_path_file);
     int status = system(cmd);
     if (status < 0) perror("system");
     if (status != 0) perror("editior failed");

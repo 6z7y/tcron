@@ -5,8 +5,10 @@
 #include <string.h>
 #include <sys/file.h>
 #include <unistd.h>
+#include <time.h>
 
-#include "errors.h"
+#include "DATA.h"
+#include "logs.h"
 
 int signal_instance()
 {
@@ -19,7 +21,15 @@ int signal_instance()
   return 0;
 }
 
-void run_command(char *cmd)
+void get_time_now(char *out, size_t size)
+{
+  time_t now = time(NULL);
+  struct tm tm;
+  localtime_r(&now, &tm);
+  strftime(out, size, "[%Y-%m-%d %H:%M:%S]", &tm);
+}
+
+void run_command(MAIN_CONTEXT *ctx, char *cmd)
 {
   pid_t pid = fork();
 
@@ -40,7 +50,7 @@ void run_command(char *cmd)
 
     execvp(argv[0], argv);
 
-    error_log(cmd);// if failed command enter here
+    write_error_log(ctx, cmd);// if failed command enter here
     _exit(127);
   }
 }

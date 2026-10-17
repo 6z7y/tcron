@@ -1,4 +1,5 @@
 // add -r (recreate config)
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +10,7 @@
 #include "DATA.h"
 #include "args.h"
 #include "cfg.h"
+#include "logs.h"
 #include "utils.h"
 
 void *reload_cfg_thread(void *arg)
@@ -25,9 +27,8 @@ void *reload_cfg_thread(void *arg)
   }
 
   // put watcher types
-  inotify_add_watch(fd, ctx->file_path_parent, IN_CLOSE_WRITE);
+  inotify_add_watch(fd, ctx->files.cfg_path_parent, IN_CLOSE_WRITE);
 
-  // 4. while loop
   while (true)
   {
     ssize_t len = read(fd, &buf, sizeof(buf));
@@ -42,7 +43,7 @@ void *reload_cfg_thread(void *arg)
       // the checker
       if (event->mask & IN_CLOSE_WRITE || event->mask & IN_MODIFY) {
         if (event->len > 0 && !strcmp(event->name, "tcron")) {
-          FILE *f = fopen(ctx->file_path_file, "r");
+          FILE *f = fopen(ctx->files.cfg_path_file, "r");
           if (!f) {
             perror("file");
             continue;
@@ -62,8 +63,8 @@ void *reload_cfg_thread(void *arg)
 
 int main(int argc, char **argv)
 {
+  signal(SIGCHLD, SIG_IGN);
   MAIN_CONTEXT ctx = {0};
-  pthread_mutex_init(&ctx.lock, NULL);
 
   get_path(&ctx);
 
@@ -75,8 +76,9 @@ int main(int argc, char **argv)
   }
 
   check_cfg(&ctx);
+  init_logs(&ctx);
 
-  FILE *f = fopen(ctx.file_path_file, "r");
+  FILE *f = fopen(ctx.files.cfg_path_file, "r");
   if (!f) {
     perror("file");
     return -1;
@@ -88,6 +90,7 @@ int main(int argc, char **argv)
   pthread_create(&ctx.reload_cfg, NULL, reload_cfg_thread, &ctx);
   pthread_detach(ctx.reload_cfg);
 
+  char copy_cmd[CMD_SIZE];
   while (1) {
     time_t now = time(NULL);
     struct tm *current = localtime(&now);
@@ -98,7 +101,9 @@ int main(int argc, char **argv)
       if (ctx.lay[i].type == SCHEDULE_INTERVAL) {
         if (ctx.lay[i].counter >= ctx.lay[i].interval_sec) {
 
-          run_command(ctx.lay[i].cmd);
+          strcpy(copy_cmd, ctx.lay[i].cmd);
+          run_command(&ctx, ctx.lay[i].cmd);
+          write_access_log(&ctx, copy_cmd);
 
           ctx.lay[i].counter = 0;
         }
@@ -109,7 +114,11 @@ int main(int argc, char **argv)
           current->tm_min == ctx.lay[i].minute &&
           current->tm_sec == 0) {
 
-            run_command(ctx.lay[i].cmd);
+          strcpy(copy_cmd, ctx.lay[i].cmd);
+          run_command(&ctx, ctx.lay[i].cmd);
+          write_access_log(&ctx, copy_cmd);
+
+          ctx.lay[i].counter = 0;
         }
       }
     }

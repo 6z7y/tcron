@@ -2,6 +2,7 @@
 #define DATA_H
 
 #include <pthread.h>
+#include <stdio.h>
 
 #define PROG_NAME "tcron"
 #define PROG_VER "1.0.0"
@@ -29,12 +30,23 @@ typedef struct {
 } Layer;
 
 typedef struct {
+  char cfg_path_parent[128];
+  char cfg_path_file[128];
+
+  char log_path_parent[128];
+  char log_access_path_file[128];
+  char log_errors_path_file[128];
+
+  FILE *f_log_access;
+  FILE *f_log_errors;
+
+} Files;
+
+typedef struct {
   Layer lay[512];
-  char file_path_parent[128];
-  char file_path_file[128];
+  Files files;
   int current_ind;
   pthread_t reload_cfg;
-  pthread_mutex_t lock;
 
 } MAIN_CONTEXT;
 

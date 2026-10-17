@@ -4,14 +4,21 @@
 #include <unistd.h>
 
 #include "DATA.h"
-#include "utils.h"
 
 void get_path(MAIN_CONTEXT *ctx)
 {
   const char *home_path = getenv("HOME");
   if (home_path == NULL) exit(-1);
-  sprintf(ctx->file_path_parent, "%s/.local/share/tcron/", home_path);
-  sprintf(ctx->file_path_file, "%stcron", ctx->file_path_parent);
+
+  // cfg paths
+  sprintf(ctx->files.cfg_path_parent, "%s/.local/share/tcron/", home_path);
+  sprintf(ctx->files.cfg_path_file, "%stcron", ctx->files.cfg_path_parent);
+
+  // logs paths
+  sprintf(ctx->files.log_path_parent, "%s/.local/state/tcron/", home_path);
+  sprintf(ctx->files.log_access_path_file, "%s/.local/state/tcron/access.log", home_path);
+  sprintf(ctx->files.log_errors_path_file, "%s/.local/state/tcron/errors.log", home_path);
+
 }
 
 int to_sec(char *interval)
@@ -53,6 +60,7 @@ void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
       ctx->lay[ctx->current_ind].type = SCHEDULE_INTERVAL;
       ctx->lay[ctx->current_ind].interval_sec = to_sec(schedule);
       // printf("Interval: %s, cmd: %s\n", schedule, cmd);
+
     }
     strcpy(ctx->lay[ctx->current_ind].cmd, cmd);
     ctx->current_ind++;
@@ -62,14 +70,14 @@ void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
 void init_cfg_parent(MAIN_CONTEXT *ctx)
 {
   char cmd[256];
-  snprintf(cmd, sizeof cmd, "mkdir -p -m 755 '%s'", ctx->file_path_parent);
+  snprintf(cmd, sizeof cmd, "mkdir -p -m 755 '%s'", ctx->files.cfg_path_parent);
   FILE *f = popen(cmd, "r");
   pclose(f);
 }
 
 void init_cfg_file(MAIN_CONTEXT *ctx)
 {
-  FILE *f = fopen(ctx->file_path_file, "w");
+  FILE *f = fopen(ctx->files.cfg_path_file, "w");
 
   if (!f) {
     perror("something happend");
@@ -90,9 +98,9 @@ void init_cfg_file(MAIN_CONTEXT *ctx)
 
 void check_cfg(MAIN_CONTEXT *ctx)
 {
-  if (access(ctx->file_path_parent, F_OK) != 0)
+  if (access(ctx->files.cfg_path_parent, F_OK) != 0)
     init_cfg_parent(ctx);
 
-  if (access(ctx->file_path_file, F_OK) != 0)
+  if (access(ctx->files.cfg_path_file, F_OK) != 0)
     init_cfg_file(ctx);
 }
