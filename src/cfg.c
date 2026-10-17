@@ -47,12 +47,12 @@ void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
 
       sscanf(schedule, "%d:%d", &ctx->lay[ctx->current_ind].hour, &ctx->lay[ctx->current_ind].minute);
 
-      printf("TIME: %02d:%02d , cmd: %s\n", ctx->lay[ctx->current_ind].hour, ctx->lay[ctx->current_ind].minute, cmd);
+      // printf("TIME: %02d:%02d , cmd: %s\n", ctx->lay[ctx->current_ind].hour, ctx->lay[ctx->current_ind].minute, cmd);
     }
     else {
       ctx->lay[ctx->current_ind].type = SCHEDULE_INTERVAL;
       ctx->lay[ctx->current_ind].interval_sec = to_sec(schedule);
-      printf("Interval: %s, cmd: %s\n", schedule, cmd);
+      // printf("Interval: %s, cmd: %s\n", schedule, cmd);
     }
     strcpy(ctx->lay[ctx->current_ind].cmd, cmd);
     ctx->current_ind++;
