@@ -35,7 +35,7 @@ sudo make uninstall
 
 Config file (created on first run):
 
-    ~/.local/share/tcron/.tcron
+    ~/.local/share/tcron/tcron
 
 Edit it with `tcron -e`. Changes reload automatically.
 
