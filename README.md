@@ -35,11 +35,11 @@ sudo make uninstall
 
 Config file (created on first run):
 
-    ~/.local/share/tcron/tcron
+    /etc/tcron/tcron
 
 Edit it with `tcron -e`. Changes reload automatically.
 
-### Interval
+#### Interval Type
 
 Run every N seconds, minutes, hours, days or weeks (`s`, `m`, `h`, `d`, `w`).
 
@@ -50,7 +50,7 @@ Example:
     10s echo hello
     5m date
 
-### Time
+#### Time Type
 
 Run every day at a fixed time (24-hour).
 
@@ -60,6 +60,14 @@ Example:
 
     08:30 echo Good morning
 
+
+### Logs
+
+tcron writes command errors to:
+
+/var/log/tcron
+
+The log can be useful for checking commands that failed to execute.
 ## Usage
 
 ```sh
