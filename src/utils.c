@@ -1,4 +1,5 @@
 // add -r (recreate config)
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -48,7 +49,14 @@ void run_command(MAIN_CONTEXT *ctx, char *cmd)
       argv[++i] = strtok(NULL, " ");
     }
 
-    execvp(argv[0], argv);
+    int nul = open("/dev/null", O_RDONLY);
+    if (nul >= 0) {
+      dup2(nul, STDOUT_FILENO); // -> /dev/null
+      dup2(nul, STDERR_FILENO); // -> /dev/null
+      close(nul);
+    }
+
+    execlp("sh", "sh", "-c", cmd, (char *)NULL);
 
     write_error_log(ctx, cmd);// if failed command enter here
     _exit(127);
