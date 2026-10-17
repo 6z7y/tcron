@@ -61,15 +61,20 @@ void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
 
 void init_cfg_parent(MAIN_CONTEXT *ctx)
 {
-  char cmd[128];
-  snprintf(cmd, 128, "mkdir -m 755 %s", ctx->file_path_parent);
-  run_command(cmd);
-
+  char cmd[256];
+  snprintf(cmd, sizeof cmd, "mkdir -p -m 755 '%s'", ctx->file_path_parent);
+  FILE *f = popen(cmd, "r");
+  pclose(f);
 }
 
 void init_cfg_file(MAIN_CONTEXT *ctx)
 {
   FILE *f = fopen(ctx->file_path_file, "w");
+
+  if (!f) {
+    perror("something happend");
+    exit(-1);
+  }
 
   fprintf(f, 
       "# Interval type: 1s, 1m, 1h, 1d, 1w\n"
