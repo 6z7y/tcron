@@ -11,7 +11,7 @@ void get_path(MAIN_CONTEXT *ctx)
   const char *home_path = getenv("HOME");
   if (home_path == NULL) exit(-1);
   sprintf(ctx->file_path_parent, "%s/.local/share/tcron/", home_path);
-  sprintf(ctx->file_path_file, "%s.tcron", ctx->file_path_parent);
+  sprintf(ctx->file_path_file, "%stcron", ctx->file_path_parent);
 }
 
 int to_sec(char *interval)
