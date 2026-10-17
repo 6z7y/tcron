@@ -71,11 +71,6 @@ void init_cfg_file(MAIN_CONTEXT *ctx)
 {
   FILE *f = fopen(ctx->file_path_file, "w");
 
-  if (!f) {
-    perror("something happend");
-    exit(-1);
-  }
-
   fprintf(f, 
       "# Interval type: 1s, 1m, 1h, 1d, 1w\n"
       "# Example: run ls every 2 sec\n"
