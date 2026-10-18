@@ -65,7 +65,8 @@ Example:
 
 tcron writes inputs and errors to:
 
-/var/log/tcron
+    /var/log/tcron/access.log   (jobs that were started)
+    /var/log/tcron/errors.log   (errors)
 
 The log can be useful for checking executed inputs and errors.
 
@@ -80,5 +81,17 @@ Available command-line options:
 - `-e` — Open the configuration in the editor specified by `$EDITOR`.
 - `-h`, `--help` — Show help.
 - `-v`, `--version` — Show version information.
+
+## Services
+
+`make install` detects your init system (systemd or runit) and installs the matching service file. It does not enable it, so run the command for your init:
+
+### runit
+
+    sudo ln -s /etc/sv/tcron /var/service/
+
+### systemd
+
+    systemctl --user enable --now tcron
 
 Changes are detected while `tcron` is running, and the configuration is reloaded.
