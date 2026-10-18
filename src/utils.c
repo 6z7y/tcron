@@ -40,15 +40,6 @@ void run_command(MAIN_CONTEXT *ctx, char *cmd)
   }
 
   if (pid == 0) {
-    // char *argv[32];
-    // int i=0;
-
-    // argv[i] = strtok(cmd, " ");
-    //
-    // while (argv[i] != NULL && i < 31) {
-    //   argv[++i] = strtok(NULL, " ");
-    // }
-
     int nul = open("/dev/null", O_RDONLY);
     if (nul >= 0) {
       dup2(nul, STDOUT_FILENO); // -> /dev/null
@@ -58,7 +49,7 @@ void run_command(MAIN_CONTEXT *ctx, char *cmd)
 
     execl("/bin/sh", "sh", "-c", cmd, (char *)NULL);
 
-    write_error_log(ctx, cmd);// if failed command enter here
+    write_error_log(ctx, cmd, true);// if failed command enter here
     _exit(127);
   }
 }

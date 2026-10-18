@@ -16,11 +16,14 @@ void write_access_log(MAIN_CONTEXT *ctx, const char *msg)
   if (ctx->files.f_log_access) fprintf(ctx->files.f_log_access, "%s-- %s\n", ts, msg);
 }
 
-void write_error_log(MAIN_CONTEXT *ctx, const char *msg)
+void write_error_log(MAIN_CONTEXT *ctx, const char *msg, int ERR)
 {
   char ts[32];
   get_time_now(ts, sizeof ts);
-  if (ctx->files.f_log_errors) fprintf(ctx->files.f_log_errors, "%s-- %s: %s\n", ts, msg, strerror(errno));
+  if (ERR) 
+    {if (ctx->files.f_log_errors) fprintf(ctx->files.f_log_errors, "%s-- %s: %s\n", ts, msg, strerror(errno));}
+  else 
+    {if (ctx->files.f_log_errors) fprintf(ctx->files.f_log_errors, "%s-- %s\n", ts, msg);}
 }
 
 void init_logs(MAIN_CONTEXT *ctx)
