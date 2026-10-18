@@ -5,13 +5,14 @@
 #include <stdio.h>
 
 #define PROG_NAME "tcron"
-#define PROG_VER "1.2.1"
+#define PROG_VER "1.2.2"
 
 #define true 1
 #define false 0
 
 #define CMD_SIZE 1024
 #define LINE_SIZE 512
+#define MAX_LIST_JOBS 512
 
 typedef enum {
   SCHEDULE_INTERVAL,
