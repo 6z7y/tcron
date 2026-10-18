@@ -41,7 +41,7 @@ int arg_handle(MAIN_CONTEXT *ctx, int argc, char **argv)
   }
 
   if (arg_match_opts(&argc, argv, ver_opts) == 1) {
-    printf("%s: %s\n", PROG_NAME, PROG_VER); return 1; 
+    printf("%s: v%s\n", PROG_NAME, PROG_VER); return 1; 
   }
 
   die("unknown option '%s'.", argv[1]);
