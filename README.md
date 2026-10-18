@@ -61,13 +61,14 @@ Example:
     08:30 echo Good morning
 
 
-### Logs
+## Logs
 
 tcron writes inputs and errors to:
 
 /var/log/tcron
 
 The log can be useful for checking executed inputs and errors.
+
 ## Usage
 
 ```sh
