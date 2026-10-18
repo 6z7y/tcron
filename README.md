@@ -49,9 +49,9 @@ Examples:
 
 10s echo hello
 5m date
-1h,33m echo hello
-2h,13m,33s echo hello
-33s,13m,2h echo hello
+1h,33m echo "hello after 1h 33m"
+2h,13m,33s echo "hello after 2h 13m 33s"
+33s,13m,2h echo "same duration, different order"
 
 The order of the time units does not matter.
 
