@@ -45,8 +45,48 @@ int to_sec(char *interval)
   return total;
 }
 
+void init_cfg_parent(MAIN_CONTEXT *ctx)
+{
+  char cmd[256];
+  snprintf(cmd, sizeof cmd, "mkdir -p -m 755 '%s'", ctx->files.cfg_path_parent);
+  FILE *f = popen(cmd, "r");
+  pclose(f);
+}
+
+void init_cfg_file(MAIN_CONTEXT *ctx)
+{
+  FILE *f = fopen(ctx->files.cfg_path_file, "w");
+
+  if (!f) die("something happend:");
+
+  fprintf(f,
+      "# Interval type: 1s, 1m, 1h, 1d, 1w\n"
+      "# You can combine intervals: 1h,30m,20s\n"
+      "# Example: run ls every 2 hours and 30 minutes\n"
+      "2h,30m ls\n\n"
+      "# Time type: HH:MM (24-hour format)\n"
+      "# Example: run pwd at 08:30\n"
+      "08:30 pwd\n"
+      );
+  fchmod(fileno(f), 0666);
+
+  fclose(f);
+}
+
+void check_cfg(MAIN_CONTEXT *ctx)
+{
+  if (access(ctx->files.cfg_path_parent, F_OK) != 0)
+    init_cfg_parent(ctx);
+
+  if (access(ctx->files.cfg_path_file, F_OK) != 0)
+    init_cfg_file(ctx);
+
+}
+
 void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
 {
+  check_cfg(ctx);
+
   ctx->current_ind = 0;
   char line[LINE_SIZE];
   char schedule[16];
@@ -77,42 +117,4 @@ void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
     strcpy(ctx->lay[ctx->current_ind].cmd, cmd);
     ctx->current_ind++;
   }
-}
-
-void init_cfg_parent(MAIN_CONTEXT *ctx)
-{
-  char cmd[256];
-  snprintf(cmd, sizeof cmd, "mkdir -p -m 755 '%s'", ctx->files.cfg_path_parent);
-  FILE *f = popen(cmd, "r");
-  pclose(f);
-}
-
-void init_cfg_file(MAIN_CONTEXT *ctx)
-{
-  FILE *f = fopen(ctx->files.cfg_path_file, "w");
-
-  if (!f) die("something happend:");
-
-  fprintf(f,
-      "# Interval type: 1s, 1m, 1h, 1d, 1w\n"
-      "# You can combine intervals: 1h,30m,20s\n"
-      "# Example: run ls every 2 hours and 30 minutes\n"
-      "2h,30m ls\n\n"
-      "# Time type: HH:MM (24-hour format)\n"
-      "# Example: run pwd at 08:30\n"
-      "08:30 pwd\n"
-      );
-  fchmod(fileno(f), 0644);
-
-  fclose(f);
-}
-
-void check_cfg(MAIN_CONTEXT *ctx)
-{
-  if (access(ctx->files.cfg_path_parent, F_OK) != 0)
-    init_cfg_parent(ctx);
-
-  if (access(ctx->files.cfg_path_file, F_OK) != 0)
-    init_cfg_file(ctx);
-
 }

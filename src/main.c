@@ -1,4 +1,3 @@
-// add -r (recreate config)
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,7 +27,12 @@ void *reload_cfg_thread(void *arg)
   }
 
   // put watcher types
-  inotify_add_watch(fd, ctx->files.cfg_path_parent, IN_CLOSE_WRITE);
+  inotify_add_watch(fd, ctx->files.cfg_path_parent,
+                  IN_CLOSE_WRITE |
+                  IN_CREATE |
+                  IN_DELETE |
+                  IN_MOVED_FROM |
+                  IN_MOVED_TO);
 
   while (true)
   {
@@ -42,17 +46,27 @@ void *reload_cfg_thread(void *arg)
       struct inotify_event *event = (struct inotify_event*)&buf[i];
 
       // the checker
-      if (event->mask & IN_CLOSE_WRITE || event->mask & IN_MODIFY) {
+      if (event->mask & IN_CLOSE_WRITE || event->mask & IN_MODIFY ||
+          event->mask & IN_MOVED_FROM || event->mask & IN_MOVED_TO ||
+          event->mask & IN_MOVE_SELF || event->mask & IN_DELETE ||
+          event->mask & IN_DELETE_SELF) {
+
         if (event->len > 0 && !strcmp(event->name, "tcron")) {
-          FILE *f = fopen(ctx->files.cfg_path_file, "r");
-          if (!f) {
-            perror("file");
-            continue;
+          if (event->mask & IN_CLOSE_WRITE) {
+            FILE *f = fopen(ctx->files.cfg_path_file, "r");
+            if (!f) {
+              perror("file");
+              continue;
+            }
+
+            read_cfg_file(ctx, f);
+
+            fclose(f);
           }
 
-          read_cfg_file(ctx, f);
-
-          fclose(f);
+          if (event->mask & (IN_MOVED_TO | IN_CREATE | IN_DELETE | IN_MOVED_FROM)) {
+            check_cfg(ctx);
+          }
         }
       }
       i += sizeof(struct inotify_event) + event->len;
@@ -71,6 +85,9 @@ int main(int argc, char **argv)
   if (arg_handle(&ctx, argc, argv) > 0) return 0;
 
   signal(SIGCHLD, SIG_IGN);
+
+  if (getuid() != 0) 
+    die("tcron: must run as root.");
 
   if (signal_instance() > 0)
     die("tcron: is already running!");
