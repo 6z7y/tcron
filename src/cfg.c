@@ -94,7 +94,7 @@ void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
 
   while (fgets(line, LINE_SIZE, f)) {
     if (ctx->current_ind >= MAX_LIST_JOBS) {
-      write_error_log(ctx, "the job has max 512!", false);
+      write_error_log(ctx, "the job has max 512!");
       break;
     };
 
@@ -110,7 +110,9 @@ void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
       ctx->lay[ctx->current_ind].type = SCHEDULE_INTERVAL;
       ctx->lay[ctx->current_ind].interval_sec = to_sec(schedule);
       if (ctx->lay[ctx->current_ind].interval_sec <= 0) {
-        write_error_log(ctx, "can't read < 0!", false);
+        char msg[LINE_SIZE];
+        snprintf(msg, sizeof msg, "invalid interval '%s' for command '%s'", schedule, cmd);
+        write_error_log(ctx, msg);
         continue;
       }
     }
