@@ -6,12 +6,10 @@
 
 #include "DATA.h"
 #include "errors.h"
+#include "logs.h"
 
 void get_path(MAIN_CONTEXT *ctx)
 {
-  // const char *home_path = getenv("HOME");
-  // if (home_path == NULL) exit(-1);
-
   // cfg paths
   sprintf(ctx->files.cfg_path_parent, "/etc/tcron/");
   sprintf(ctx->files.cfg_path_file, "%stcron", ctx->files.cfg_path_parent);
@@ -55,11 +53,14 @@ void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
   char cmd[CMD_SIZE];
 
   while (fgets(line, LINE_SIZE, f)) {
+    if (ctx->current_ind >= MAX_LIST_JOBS) {
+      write_error_log(ctx, "the job has max 512!", false);
+      break;
+    };
+
     if (line[0] == '#' || line[0] == '\n') continue;
 
     if (sscanf(line, "%15s %1023[^\n]", schedule, cmd) != 2) continue;
-
-    if (ctx->current_ind >= 512) break;
 
     if (strchr(schedule, ':')) {
       ctx->lay[ctx->current_ind].type = SCHEDULE_TIME;
@@ -69,6 +70,7 @@ void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
       ctx->lay[ctx->current_ind].type = SCHEDULE_INTERVAL;
       ctx->lay[ctx->current_ind].interval_sec = to_sec(schedule);
       if (ctx->lay[ctx->current_ind].interval_sec <= 0) {
+        write_error_log(ctx, "can't read < 0!", false);
         continue;
       }
     }
