@@ -36,6 +36,16 @@ void check_logs(MAIN_CONTEXT *ctx)
     init_log_parent(ctx);
   }
 
+  if ((ctx->files.f_log_access && access(ctx->files.log_access_path_file, F_OK) != 0) ||
+      (ctx->files.f_log_errors && access(ctx->files.log_errors_path_file, F_OK) != 0)) {
+
+      if (ctx->files.f_log_access) fclose(ctx->files.f_log_access);
+      if (ctx->files.f_log_errors) fclose(ctx->files.f_log_errors);
+
+      ctx->files.f_log_access = NULL;
+      ctx->files.f_log_errors = NULL;
+  }
+
   if (!ctx->files.f_log_access || !ctx->files.f_log_errors)
     init_log_file(ctx);
 }
