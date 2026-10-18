@@ -8,7 +8,7 @@
 void help()
 {
     printf(
-        "Usage: tcron [OPTION]\n"
+        "Usage: sudo tcron [OPTION]\n"
         "\n"
         "Options:\n"
         "  -e              Edit tcron configuration\n"

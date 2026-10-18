@@ -9,13 +9,16 @@
 #include <time.h>
 
 #include "DATA.h"
+#include "errors.h"
 #include "logs.h"
 
 int signal_instance()
 {
   int fd = open("/tmp/tcron.lock", O_CREAT | O_RDWR, 0644);
+  if (fd == -1) die("tcron: must run as root");
 
   if (flock(fd, LOCK_EX | LOCK_NB)) {
+    close(fd);
     return 1;
   }
 

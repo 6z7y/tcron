@@ -77,8 +77,10 @@ The log can be useful for checking executed inputs and errors.
 
 ## Usage
 
-```sh
-tcron
+tcron must be run as root:
+
+```bash
+sudo tcron
 ```
 
 Available command-line options:
