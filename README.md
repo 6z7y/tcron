@@ -68,12 +68,17 @@ Example:
 
 ## Logs
 
-tcron writes job executions and errors
+tcron writes job executions and errors:
 
     /var/log/tcron/access.log   (jobs that were started)
     /var/log/tcron/errors.log   (errors)
 
-The log can be useful for checking executed inputs and errors.
+The logs are useful for checking executed jobs and errors.
+
+## Recovery Files [logs|config]
+
+If the config file or a log file is deleted or moved, tcron recreates it automatically.
+
 
 ## Usage
 
@@ -99,6 +104,4 @@ Available command-line options:
 
 ### systemd
 
-    systemctl --user enable --now tcron
-
-Changes are detected while `tcron` is running, and the configuration is reloaded.
+    sudo systemctl enable --now tcron
