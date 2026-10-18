@@ -17,9 +17,9 @@ int warn(const char *fmt, ...)
 {
   va_list args;
   va_start(args, fmt);
+  verr(fmt, args);
   va_end(args);
 
-  verr(fmt, args);
 
   return -1;
 }
@@ -28,8 +28,8 @@ void die(const char *fmt, ...)
 {
   va_list args;
   va_start(args, fmt);
-  va_end(args);
   verr(fmt, args);
+  va_end(args);
   exit(-1);
 
 }
