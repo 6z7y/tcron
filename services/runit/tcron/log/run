@@ -1,2 +1,2 @@
 #!/bin/sh
-exec svlogd -tt /var/log/tcron
+exec svlogd -tt /var/log/tcron_d
