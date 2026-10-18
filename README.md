@@ -68,7 +68,7 @@ Example:
 
 ## Logs
 
-tcron writes inputs and errors to:
+tcron writes job executions and errors
 
     /var/log/tcron/access.log   (jobs that were started)
     /var/log/tcron/errors.log   (errors)
