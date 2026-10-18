@@ -10,6 +10,7 @@
 #include "DATA.h"
 #include "args.h"
 #include "cfg.h"
+#include "errors.h"
 #include "logs.h"
 #include "utils.h"
 
@@ -71,24 +72,15 @@ int main(int argc, char **argv)
 
   signal(SIGCHLD, SIG_IGN);
 
-  int r = signal_instance();
+  if (signal_instance() > 0)
+    die("tcron: is already running!");
 
-  if (r == -1) {
-    printf("tcron is already running!\n");
-    return 0;
-  }
-  if (r < 0) {
-    return -1;
-  }
 
   check_cfg(&ctx);
   init_logs(&ctx);
 
   FILE *f = fopen(ctx.files.cfg_path_file, "r");
-  if (!f) {
-    perror("file");
-    return -1;
-  }
+  if (!f) die("file:");
 
   read_cfg_file(&ctx, f);
 

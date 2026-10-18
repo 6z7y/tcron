@@ -3,6 +3,7 @@
 
 #include "../libs/arg_match.h"
 #include "DATA.h"
+#include "errors.h"
 
 void help()
 {
@@ -31,8 +32,8 @@ int arg_handle(MAIN_CONTEXT *ctx, int argc, char **argv)
     char cmd[128];
     snprintf(cmd, 128, "%s %s", editor, ctx->files.cfg_path_file);
     int status = system(cmd);
-    if (status < 0) perror("system");
-    if (status != 0) perror("editior failed");
+    if (status < 0) die("system:");
+    if (status != 0) die("editor failed:");
     return 1;
   }
   if (arg_match_opts(&argc, argv, help_opts) == 1) {
@@ -43,6 +44,6 @@ int arg_handle(MAIN_CONTEXT *ctx, int argc, char **argv)
     printf("%s: %s\n", PROG_NAME, PROG_VER); return 1; 
   }
 
-  printf("unknown option '%s'.\n", argv[1]);
+  die("unknown option '%s'.", argv[1]);
   return 1;
 }

@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 
 #include "DATA.h"
+#include "errors.h"
 
 void get_path(MAIN_CONTEXT *ctx)
 {
@@ -38,9 +39,11 @@ int to_sec(char *interval)
       case 'w': total += value * 604800; break;
       default: return -1;
     }
+    if (value < 0) return -1;
 
     part = strtok(NULL, ",");
   }
+  if (total <= 0) return -1;
   return total;
 }
 
@@ -56,18 +59,18 @@ void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
 
     if (sscanf(line, "%15s %1023[^\n]", schedule, cmd) != 2) continue;
 
+    if (ctx->current_ind >= 512) break;
+
     if (strchr(schedule, ':')) {
       ctx->lay[ctx->current_ind].type = SCHEDULE_TIME;
-
       sscanf(schedule, "%d:%d", &ctx->lay[ctx->current_ind].hour, &ctx->lay[ctx->current_ind].minute);
-
-      // printf("TIME: %02d:%02d , cmd: %s\n", ctx->lay[ctx->current_ind].hour, ctx->lay[ctx->current_ind].minute, cmd);
     }
     else {
       ctx->lay[ctx->current_ind].type = SCHEDULE_INTERVAL;
       ctx->lay[ctx->current_ind].interval_sec = to_sec(schedule);
-      // printf("Interval: %s, cmd: %s\n", schedule, cmd);
-
+      if (ctx->lay[ctx->current_ind].interval_sec <= 0) {
+        continue;
+      }
     }
     strcpy(ctx->lay[ctx->current_ind].cmd, cmd);
     ctx->current_ind++;
@@ -86,12 +89,9 @@ void init_cfg_file(MAIN_CONTEXT *ctx)
 {
   FILE *f = fopen(ctx->files.cfg_path_file, "w");
 
-  if (!f) {
-    perror("something happend");
-    exit(-1);
-  }
+  if (!f) die("something happend:");
 
-  fprintf(f, 
+  fprintf(f,
       "# Interval type: 1s, 1m, 1h, 1d, 1w\n"
       "# You can combine intervals: 1h,30m,20s\n"
       "# Example: run ls every 2 hours and 30 minutes\n"
@@ -100,7 +100,7 @@ void init_cfg_file(MAIN_CONTEXT *ctx)
       "# Example: run pwd at 08:30\n"
       "08:30 pwd\n"
       );
-  fchmod(fileno(f), 0666);
+  fchmod(fileno(f), 0644);
 
   fclose(f);
 }
