@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 
 
   check_cfg(&ctx);
-  init_logs(&ctx);
+  check_logs(&ctx);
 
   FILE *f = fopen(ctx.files.cfg_path_file, "r");
   if (!f) die("file:");
