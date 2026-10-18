@@ -1,5 +1,5 @@
-// add -r (recreate config)
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -7,6 +7,7 @@
 #include <sys/file.h>
 #include <unistd.h>
 #include <time.h>
+#include <wait.h>
 
 #include "DATA.h"
 #include "errors.h"
@@ -36,24 +37,28 @@ void get_time_now(char *out, size_t size)
 void run_command(MAIN_CONTEXT *ctx, char *cmd)
 {
   pid_t pid = fork();
-
-  if (pid < 0) {
-    perror("error");
-    exit(-1);
-  }
+  if (pid < 0) { write_error_log(ctx, "fork failed"); return; }
 
   if (pid == 0) {
-    int nul = open("/dev/null", O_RDONLY);
-    if (nul >= 0) {
-      dup2(nul, STDOUT_FILENO); // -> /dev/null
-      dup2(nul, STDERR_FILENO); // -> /dev/null
-      close(nul);
+    signal(SIGCHLD, SIG_DFL);
+
+    pid_t p2 = fork();
+    if (p2 < 0) _exit(1);
+
+    if (p2 == 0) {
+      int nul = open("/dev/null", O_WRONLY);
+      if (nul >= 0) { dup2(nul, STDOUT_FILENO); dup2(nul, STDERR_FILENO); close(nul); }
+      execl("/bin/sh", "sh", "-c", cmd, (char *)NULL);
+      _exit(127);
     }
 
-    execl("/bin/sh", "sh", "-c", cmd, (char *)NULL);
-
-    write_error_log(ctx, cmd, true);// if failed command enter here
-    _exit(127);
+    int st = 0;
+    if (waitpid(p2, &st, 0) > 0 && WIFEXITED(st) && WEXITSTATUS(st) != 0) {
+      char msg[CMD_SIZE + 64];
+      snprintf(msg, sizeof msg, "'%s' exited with code %d", cmd, WEXITSTATUS(st));
+      write_error_log(ctx, msg);
+    }
+    _exit(0);
   }
 }
 
