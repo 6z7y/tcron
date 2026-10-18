@@ -23,18 +23,25 @@ void get_path(MAIN_CONTEXT *ctx)
 
 int to_sec(char *interval)
 {
-  int value = atoi(interval);
-  char unit = interval[strlen(interval) - 1];
+  int total = 0;
+  char *part = strtok(interval, ",");
 
-  switch (unit) {
-    case 's': return value;
-    case 'm': return value * 60;
-    case 'h': return value * 3600;
-    case 'd': return value * 86400;
-    case 'w': return value * 604800;
+  while (part != NULL) {
+    int value = atoi(part);
+    char unit = part[strlen(part) - 1];
+
+    switch (unit) {
+      case 's': total += value; break;
+      case 'm': total += value * 60; break;
+      case 'h': total += value * 3600; break;
+      case 'd': total += value * 86400; break;
+      case 'w': total += value * 604800; break;
+      default: return -1;
+    }
+
+    part = strtok(NULL, ",");
   }
-
-  return -1;
+  return total;
 }
 
 void read_cfg_file(MAIN_CONTEXT *ctx, FILE *f)
@@ -86,8 +93,9 @@ void init_cfg_file(MAIN_CONTEXT *ctx)
 
   fprintf(f, 
       "# Interval type: 1s, 1m, 1h, 1d, 1w\n"
-      "# Example: run ls every 2 sec\n"
-      "2s ls\n\n"
+      "# You can combine intervals: 1h,30m,20s\n"
+      "# Example: run ls every 2 hours and 30 minutes\n"
+      "2h,30m ls\n\n"
       "# Time type: HH:MM (24-hour format)\n"
       "# Example: run pwd at 08:30\n"
       "08:30 pwd\n"

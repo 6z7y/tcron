@@ -41,14 +41,19 @@ Edit it with `tcron -e`. Changes reload automatically.
 
 #### Interval Type
 
-Run every N seconds, minutes, hours, days or weeks (`s`, `m`, `h`, `d`, `w`).
+Run commands after a specified interval using seconds, minutes, hours, days, or weeks (s, m, h, d, w).
 
-    <number><unit> <command>
+    <number><unit>[,<number><unit>...] <command>
 
-Example:
+Examples:
 
-    10s echo hello
-    5m date
+10s echo hello
+5m date
+1h,33m echo hello
+2h,13m,33s echo hello
+33s,13m,2h echo hello
+
+The order of the time units does not matter.
 
 #### Time Type
 
