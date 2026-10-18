@@ -13,20 +13,7 @@
 
 int signal_instance()
 {
-  const char *dir = getenv("XDG_RUNTIME_DIR");
-  char path[256];
-
-  if (dir && dir[0] == '/')
-    snprintf(path, sizeof path, "%s/tcron.lock", dir);
-  else
-    snprintf(path, sizeof path, "/tmp/tcron-%d.lock", (int)getuid());
-
-
-  int fd = open(path, O_CREAT | O_RDWR | O_CLOEXEC, 0600);
-  if (fd < 0) {
-    perror("lock file");
-    return -2;
-  }
+  int fd = open("/tmp/tcron.lock", O_CREAT | O_RDWR, 0644);
 
   if (flock(fd, LOCK_EX | LOCK_NB)) {
     return -1;
