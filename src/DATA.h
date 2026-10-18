@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #define PROG_NAME "tcron"
-#define PROG_VER "1.2.3"
+#define PROG_VER "1.2.4"
 
 #define true 1
 #define false 0
