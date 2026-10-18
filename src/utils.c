@@ -16,7 +16,7 @@ int signal_instance()
   int fd = open("/tmp/tcron.lock", O_CREAT | O_RDWR, 0644);
 
   if (flock(fd, LOCK_EX | LOCK_NB)) {
-    return -1;
+    return 1;
   }
 
   return 0;
